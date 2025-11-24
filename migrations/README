@@ -1,0 +1,14 @@
+
+📚 FastAPI Books API
+A REST API built with FastAPI for managing books, reviews, and tags.
+Supports authentication, adding reviews, tagging books, sending emails, and background tasks.
+
+
+🚀 Features:
+            CRUD for Books,
+            Add and view Reviews,
+            Attach Tags to books,
+            User Authentication (JWT),
+            Background tasks with Celery (optional),
+            Email sending support,
+            Database migrations using Alembic

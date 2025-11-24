@@ -1,0 +1,28 @@
+# ИГНОРИРУЕМ виртуальное окружение
+venv/
+env/
+.venv/
+
+# Файлы среды
+.env
+*.env
+
+# Кэш Python
+__pycache__/
+*.pyc
+
+# SQLite база
+*.db
+
+# Alembic кэш
+alembic.ini.bak
+
+# VSCode и IDE stuff
+.vscode/
+.idea/
+
+# Логи
+*.log
+
+# celery beat расписание
+celerybeat-schedule
