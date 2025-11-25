@@ -4,8 +4,7 @@ env/
 .venv/
 
 # Файлы среды
-.env
-*.env
+
 
 # Кэш Python
 __pycache__/
