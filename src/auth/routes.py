@@ -24,11 +24,12 @@ from .utils import (create_url_safe_token,decode_url_safe_token)
 auth_router = APIRouter()
 user_service = UserService()
 
-role_checker = RoleChecker(["admin", "user"])
+admin_role_checker = RoleChecker(["admin"])
+user_role_checker = RoleChecker(["user"])
 REFRESH_TOKEN_EXPIRY = 2
 
 @auth_router.get("/me", response_model=UserBooksModel)
-async def get_current_user(user=Depends(get_current_user), _: bool = Depends(role_checker)):
+async def get_current_user(user=Depends(get_current_user), _: bool = Depends(admin_role_checker)):
     return user
 
 @auth_router.get("/verify/{token}")

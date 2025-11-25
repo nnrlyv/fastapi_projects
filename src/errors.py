@@ -1,4 +1,4 @@
-from typing import Callable,Any
+from typing import Any, Callable
 from fastapi.responses import JSONResponse
 from fastapi.requests import Request
 from fastapi import FastAPI,status
@@ -55,23 +55,21 @@ class UserNotFound(BooklyException):
     #User not found
     pass
 
-def register_all_errors(app:FastAPI):
-    app.add_exception_handler(AccountNotVerified,create_exception_handler(
-        status_code=status.HTTP_403_FORBIDDEN,
-        initial_detail={
-        "msg":"Account Not Verified",
-        "error_code":"Account_Not_Verified",
-        "resolution":"Please check your email for verification details"}
-    ))
 
 
 def create_exception_handler(status_code:int, initial_detail:Any)->Callable[[Request,Exception],JSONResponse]:
-    async def exception_handler(request:Request,exc:BooklyException):
+    async def exception_handler(request:Request, exc:BooklyException):
         return JSONResponse(content = initial_detail, status_code=status_code)
     return exception_handler
 
 
 def register_error_handlers(app:FastAPI):
+    app.add_exception_handler(AccountNotVerified,
+        create_exception_handler(status_code=status.HTTP_403_FORBIDDEN,
+                                 initial_detail={"msg": "Account Not Verified",
+                                                 "error_code": "Account_Not_Verified",
+                                                 "resolution": "Please check your email for verification details"}))
+
     app.add_exception_handler(UserAlreadyExists,
         create_exception_handler(status_code=status.HTTP_403_FORBIDDEN,
                                  initial_detail={"msg": "User with email already exists",
@@ -142,14 +140,14 @@ def register_error_handlers(app:FastAPI):
                                  initial_detail={"msg": "Book Not Found",
                                                  "error_code": "book_not_found"}))
 
-    @app.exception_handler(500)
+    @app.exception_handler(505)
     async def internal_server_error(request, exc):
         return JSONResponse(
             content={
                 "message": "Oops! Something went wrong",
                 "error_code": "server_error",
             },
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
 
