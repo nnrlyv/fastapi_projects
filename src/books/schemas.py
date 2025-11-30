@@ -1,12 +1,19 @@
 import uuid
 from datetime import datetime
-
+from typing import List
 from pydantic import BaseModel
 
-from src.reviews.schemas import ReviewModel
-from src.tags.schemas import TagModel
 
+class TagSchema(BaseModel):
+    uid: uuid.UUID
+    name: str
 
+class ReviewSchema(BaseModel):
+    uid: uuid.UUID
+    review_text: str
+    rating: int
+
+#for pagination part without rev and tags
 class BookSchema(BaseModel):
     uid: uuid.UUID
     title: str
@@ -15,8 +22,14 @@ class BookSchema(BaseModel):
     published_date: datetime
     page_count: int
     language: str
-    tags: list[TagModel]
-    reviews: list[ReviewModel]
+
+#for rev and tags
+class BookDetailSchema(BaseModel):
+    uid: uuid.UUID
+    title: str
+    publisher: str
+    reviews: list[ReviewSchema] = []
+    tags: list[TagSchema] = []
 
 
 
@@ -36,4 +49,11 @@ class BookCreateModel(BaseModel):
     page_count: int
     language: str
 
+
+class PaginatedBooksResponse(BaseModel):
+    items: List[BookSchema]
+    total: int
+    page: int
+    limit: int
+    pages: int
 

@@ -1,7 +1,6 @@
 import logging
-from http.client import HTTPException
 
-from fastapi import status
+from fastapi import status,HTTPException
 from sqlmodel import select, desc
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -25,10 +24,10 @@ class ReviewService:
             new_review = Review(**review_data_dict)
 
             if not book:
-                raise HTTPException(detail = "Book not found", status_code=status.HTTP_404_NOT_FOUND)
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail = "Book not found")
 
             if not user:
-                raise HTTPException(detail = "Book not found", status_code=status.HTTP_404_NOT_FOUND)
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail = "Book not found")
 
             new_review.user = user
             new_review.book = book
@@ -38,7 +37,7 @@ class ReviewService:
 
         except Exception as e:
             logging.exception(e)
-            raise HTTPException(detail="Oops... somethig went wrong!",status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="Oops... somethig went wrong!")
 
     async def get_review(self,review_uid:str, session:AsyncSession):
         statement= select(Review).where(Review.uid == review_uid)
@@ -55,6 +54,6 @@ class ReviewService:
         review = await self.get_review(review_uid,session)
 
         if not review or (review.user is not user):
-            raise HTTPException(detail="Cannot delete this review",status_code=status.HTTP_403_FORBIDDEN)
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Cannot delete this review")
         session.add(review)
         await session.commit()

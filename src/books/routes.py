@@ -6,7 +6,7 @@ from fastapi import status,Depends
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from src.db.main import get_session
-from src.books.schemas import BookSchema, BookUpdateModel, BookCreateModel
+from src.books.schemas import BookSchema, BookUpdateModel, BookCreateModel, PaginatedBooksResponse, BookDetailSchema
 from src.books.service import BookService
 from src.auth.dependencies import AccessTokenBearer, RoleChecker
 
@@ -17,11 +17,20 @@ access_token_bearer = AccessTokenBearer()
 admin_role_checker = RoleChecker(["admin"])
 role_checker = RoleChecker(["user", "admin"])
 
-@book_router.get("/", response_model=List[BookSchema], dependencies=[Depends(role_checker)]) #get all
-async def get_all_books(session: AsyncSession = Depends(get_session),token_details:dict= Depends(access_token_bearer)):
+@book_router.get("/", response_model=PaginatedBooksResponse, dependencies=[Depends(role_checker)]) #get all
+async def get_all_books(session: AsyncSession = Depends(get_session),token_details:dict= Depends(access_token_bearer), page: int = 1, limit: int = 10):
     print(token_details)
-    books = await book_service.get_all_books(session)
-    return books
+    books_data = await book_service.get_all_books(session, page , limit)
+    items = [BookSchema.model_validate(book, from_attributes=True) for book in books_data['items']]
+
+    return PaginatedBooksResponse(
+        items=items,
+        total=books_data['total'],
+        page=books_data['page'],
+        limit=books_data['limit'],
+        pages=books_data['pages']
+    )
+
 
 @book_router.post("/", status_code=status.HTTP_201_CREATED, response_model=BookSchema, dependencies=[Depends(role_checker)]) #creating
 async def create_book(book_data: BookCreateModel, session: AsyncSession = Depends(get_session),token_details:dict= Depends(access_token_bearer)) -> dict:
@@ -34,7 +43,7 @@ async def get_user_book_submissions(user_uid: str,session: AsyncSession = Depend
     books = await book_service.get_user_books(user_uid, session)
     return books
 
-@book_router.get("/{book_uid}", response_model=BookSchema, dependencies=[Depends(role_checker)]) #get one book
+@book_router.get("/{book_uid}", response_model=BookDetailSchema, dependencies=[Depends(role_checker)]) #get one book
 async def get_book(book_uid:str,session: AsyncSession = Depends(get_session), _: dict = Depends(access_token_bearer)) -> dict:
    book = await book_service.get_book(book_uid,session)
 

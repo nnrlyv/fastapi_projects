@@ -44,7 +44,7 @@ class Book(SQLModel, table=True):
     user_uid: Optional[uuid.UUID] = Field(default=None, foreign_key="user.uid")
 
     user: Optional["User"] = Relationship(back_populates="books")
-    reviews: List["Review"] = Relationship(back_populates="books", sa_relationship_kwargs={"lazy": "selectin"})
+    reviews: List["Review"] = Relationship(back_populates="book", sa_relationship_kwargs={"lazy": "selectin"})
     tags: List["Tag"] = Relationship(back_populates="books", link_model=BookTag, sa_relationship_kwargs={"lazy": "selectin"} )
 
 
@@ -59,7 +59,7 @@ class Review(SQLModel, table = True):
     created_at:datetime = Field(default_factory=datetime.now)
     updated_at:datetime = Field(default_factory=datetime.now)
     user: Optional["User"] = Relationship(back_populates="reviews")
-    books: List["Book"] = Relationship(back_populates="reviews")
+    book: Optional["Book"] = Relationship(back_populates="reviews")
 
 
 

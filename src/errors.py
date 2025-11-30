@@ -55,6 +55,9 @@ class UserNotFound(BooklyException):
     #User not found
     pass
 
+class ReviewNotFound(BooklyException):
+    pass
+
 
 
 def create_exception_handler(status_code:int, initial_detail:Any)->Callable[[Request,Exception],JSONResponse]:
@@ -121,12 +124,12 @@ def register_error_handlers(app:FastAPI):
     app.add_exception_handler(NoPermission,
         create_exception_handler(status_code=status.HTTP_401_UNAUTHORIZED,
                                  initial_detail={"msg": "You do not have enough permissions to perform this action",
-                                                 "error_code": "insufficient_permissions"}))
+                                                 "error_code": "no_permissions"}))
 
-    app.add_exception_handler(NoPermission,
+    app.add_exception_handler(ReviewNotFound,
         create_exception_handler(status_code=status.HTTP_404_NOT_FOUND,
-                                initial_detail={"msg": "Tag not found",
-                                                "error_code": "tag_not_found"}))
+                                initial_detail={"msg": "Review not found",
+                                                "error_code": "review_not_found"}))
 
 
     app.add_exception_handler(TagAlreadyExists,

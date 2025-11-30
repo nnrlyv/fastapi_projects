@@ -1,5 +1,8 @@
 from datetime import datetime
+from math import ceil
+from typing import List
 
+from sqlalchemy import func
 from sqlalchemy.orm import selectinload
 from sqlmodel import desc,select
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -8,11 +11,32 @@ from src.db.models import Book
 from src.books.schemas import BookCreateModel, BookUpdateModel
 
 class BookService:
-    #here CRUD
-    async def get_all_books(self,session: AsyncSession):
-        statement = select(Book).order_by(desc(Book.created_at))
+    async def get_all_books(self,session: AsyncSession,page: int = 1,limit: int = 10) -> dict:
+        if page < 1: page = 1
+        if limit < 1: limit = 1
+        if limit > 50: limit = 50
+
+        # Общее количество книг
+        total_query = await session.exec(select(func.count()).select_from(Book))
+        total = total_query.one()
+
+        offset = (page - 1) * limit
+
+        statement = (select(Book).order_by(desc(Book.created_at)).limit(limit).offset(offset))
+
         result = await session.exec(statement)
-        return result.all()
+        books = result.all()
+
+        pages = ceil(total / limit) if total else 1
+
+        return {
+            "items": books,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "pages": pages
+        }
+
 
     async def get_user_books(self,user_uid: str,session: AsyncSession):
         statement = select(Book).where(Book.user_uid == user_uid).order_by(desc(Book.created_at))
@@ -35,8 +59,8 @@ class BookService:
     async def get_book(self,book_uid: str, session: AsyncSession):
         statement = select(Book).options(selectinload(Book.reviews),selectinload(Book.tags),selectinload(Book.user)).where(Book.uid == book_uid)
         result = await session.exec(statement)
-        return result.first()
-
+        book = result.one_or_none()
+        return book
 
     async def update_book(self,book_uid:str , update_data:BookUpdateModel,session: AsyncSession):
         book_to_update = await self.get_book(book_uid,session)
