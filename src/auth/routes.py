@@ -25,11 +25,11 @@ auth_router = APIRouter()
 user_service = UserService()
 
 admin_role_checker = RoleChecker(["admin"])
-user_role_checker = RoleChecker(["user"])
+role_checker = RoleChecker(["user","admin"])
 REFRESH_TOKEN_EXPIRY = 2
 
 @auth_router.get("/me", response_model=UserBooksModel)
-async def get_current_user(user=Depends(get_current_user), _: bool = Depends(admin_role_checker)):
+async def get_current_user(user=Depends(get_current_user), _: bool = Depends(role_checker)):
     return user
 
 @auth_router.get("/verify/{token}")

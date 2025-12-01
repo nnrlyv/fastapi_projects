@@ -16,8 +16,10 @@ config.set_main_option("sqlalchemy.url", DATABASE_URL)
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-from src.db.models import User
+from src.db.models import User,Book
 target_metadata = User.metadata
+target_metadata = Book.metadata
+
 
 def run_migrations_offline():
     url = config.get_main_option("sqlalchemy.url")
