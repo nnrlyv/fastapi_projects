@@ -20,6 +20,7 @@ from src.errors import UserAlreadyExists, UserNotFound
 from src.mail import mail , create_message
 
 from .utils import (create_url_safe_token,decode_url_safe_token)
+from src.celery_tasks import send_email
 
 auth_router = APIRouter()
 user_service = UserService()
@@ -106,8 +107,13 @@ async def create_user_account(user_data:UserCreateModel,bg_tasks: BackgroundTask
         <p>Please click this <a href="{link}">link</a> to verify your email</p>
         """
 
-    message = create_message(recipients=[email], subject="Verify Your Email", body = html_message)
-    bg_tasks.add_task(mail.send_message,message)
+    # Через Celery
+    send_email.delay(
+        recipients=[email],
+        subject="Verify Your Email",
+        body=html_message
+    )
+
     return {"msg":"Account created! Check email for verifying account",
             "user": new_user }
 
@@ -163,9 +169,12 @@ async def password_reset_request(email_data: PasswordResetRequestModel):
     <p>Please click this <a href="{link}">link</a> to Reset Your Password</p>
     """
 
-    message = create_message(recipients=[email], subject="Reset Your Password", body=html_message)
-    await mail.send_message(message)
-
+    # Через Celery
+    send_email.delay(
+        recipients=[email],
+        subject="Reset Your Password",
+        body=html_message
+    )
     return JSONResponse(
         content={
             "message": "Please check your email for instructions to reset your password",
